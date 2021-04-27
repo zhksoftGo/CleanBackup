@@ -1,0 +1,8 @@
+{
+  "checkperiod": 10,
+  "ext": [
+    "zip",
+    "bak"
+  ],
+  "path": "Z:/PRIVATE/Backup/"
+}
