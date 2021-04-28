@@ -1,5 +1,5 @@
 {
-  "checkperiod": 10,
+  "checkperiod": 1,
   "ext": [
     "zip",
     "bak"

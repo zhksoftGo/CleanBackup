@@ -14,8 +14,8 @@ func defaults() {
 
 func logViperSettings() {
 	slog.Info("Path:", viper.Get("Path"))
-	slog.Info("Ext", viper.Get("Ext"))
-	slog.Info("CheckPeriod", viper.Get("CheckPeriod"))
+	slog.Info("Extensions:", viper.Get("Ext"))
+	slog.Info("CheckPeriod(in minute):", viper.Get("CheckPeriod"))
 }
 
 func InitViperConfig(rootCmd *cobra.Command) {

@@ -7,7 +7,9 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/gookit/slog"
@@ -64,9 +66,6 @@ var cleanCmd = &cobra.Command{
 func deamonCleanUp(ctx context.Context) error {
 	slog.Info("deamonCleanUp")
 
-	// c := make(chan os.Signal)
-	// signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
 	period, ok := viper.Get("CheckPeriod").(int)
 	if !ok {
 		period = 10
@@ -75,11 +74,8 @@ func deamonCleanUp(ctx context.Context) error {
 	tick := time.Tick(time.Duration(period) * time.Minute)
 	for {
 		select {
-		// case sig := <-c:
-		// 	slog.Info("Exit with:", sig)
-		// 	return nil
 		case <-ctx.Done():
-			slog.Error(ctx.Err())
+			slog.Info(ctx.Err())
 			return nil
 		case <-tick:
 			startCleanUp(ctx)
@@ -96,7 +92,20 @@ var deamonCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		// defer cancel()
+
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		go func() {
+			for sig := range c {
+				switch sig {
+				case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+					slog.Info("Exit with:", sig)
+					cancel()
+					return
+				}
+			}
+		}()
 
 		return deamonCleanUp(ctx)
 	},
