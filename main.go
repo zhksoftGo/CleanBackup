@@ -66,9 +66,10 @@ var cleanCmd = &cobra.Command{
 func deamonCleanUp(ctx context.Context) error {
 	slog.Info("deamonCleanUp")
 
-	period, ok := viper.Get("CheckPeriod").(int)
-	if !ok {
-		period = 10
+	period := viper.Get("CheckPeriod").(float64)
+	if period < 1 {
+		slog.Error("'CheckPeriod' is too small, ", period)
+		period = 1
 	}
 
 	tick := time.Tick(time.Duration(period) * time.Minute)
